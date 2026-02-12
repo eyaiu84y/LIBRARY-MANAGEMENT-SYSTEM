@@ -1,0 +1,97 @@
+import React, { useState, useEffect } from 'react';
+import { CheckCircle, Loader2 } from 'lucide-react';
+import Table from '../../components/ui/Table';
+
+const mockTransactions = [
+    { id: 1, student: 'John Carter', book: 'Clean Code', issueDate: '2026-01-15', returnDate: '2026-02-15', status: 'Issued' },
+    { id: 2, student: 'Sarah Kim', book: 'Design Patterns', issueDate: '2026-01-20', returnDate: '2026-02-20', status: 'Returned' },
+    { id: 3, student: 'Mike Brown', book: 'The Pragmatic Programmer', issueDate: '2026-02-01', returnDate: '2026-03-01', status: 'Issued' },
+    { id: 4, student: 'Emily Chen', book: 'Artificial Intelligence', issueDate: '2026-01-10', returnDate: '2026-02-10', status: 'Overdue' },
+    { id: 5, student: 'James Wilson', book: 'Introduction to Algorithms', issueDate: '2026-02-05', returnDate: '2026-03-05', status: 'Issued' },
+];
+
+const Transactions = () => {
+    const [data, setData] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [returningId, setReturningId] = useState(null);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setData(mockTransactions);
+            setIsLoading(false);
+        }, 2000);
+        return () => clearTimeout(timer);
+    }, []);
+
+    const handleMarkReturned = (row) => {
+        setReturningId(row.id);
+        setTimeout(() => {
+            setData((prev) =>
+                prev.map((item) =>
+                    item.id === row.id ? { ...item, status: 'Returned' } : item
+                )
+            );
+            setReturningId(null);
+            console.log('Marked as returned:', row);
+        }, 2000);
+    };
+
+    const columns = [
+        { key: 'student', label: 'Student' },
+        { key: 'book', label: 'Book' },
+        { key: 'issueDate', label: 'Issue Date' },
+        { key: 'returnDate', label: 'Return Date' },
+        {
+            key: 'status',
+            label: 'Status',
+            render: (row) => {
+                const styles = {
+                    Issued: 'bg-blue-100 text-blue-700',
+                    Returned: 'bg-emerald-100 text-emerald-700',
+                    Overdue: 'bg-red-100 text-red-600',
+                };
+                return (
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${styles[row.status] || ''}`}>
+                        {row.status}
+                    </span>
+                );
+            },
+        },
+        {
+            key: 'actions',
+            label: 'Actions',
+            render: (row) => {
+                if (row.status === 'Returned') {
+                    return <span className="text-xs text-gray-400">—</span>;
+                }
+                return (
+                    <button
+                        onClick={() => handleMarkReturned(row)}
+                        disabled={returningId === row.id}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary/10 text-secondary hover:bg-secondary/20 transition-all duration-200 disabled:opacity-50"
+                        aria-label={`Mark ${row.book} as returned`}
+                    >
+                        {returningId === row.id ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                            <CheckCircle className="w-3.5 h-3.5" />
+                        )}
+                        Mark Returned
+                    </button>
+                );
+            },
+        },
+    ];
+
+    return (
+        <div className="animate-fade-in">
+            <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-text">Transactions</h2>
+                <span className="text-sm text-gray-400">{data.length} total</span>
+            </div>
+            <Table columns={columns} data={data} isLoading={isLoading} />
+        </div>
+    );
+};
+
+export default Transactions;
