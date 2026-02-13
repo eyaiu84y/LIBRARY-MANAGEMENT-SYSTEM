@@ -1,7 +1,7 @@
 import React from 'react';
 import { Bell, Search, UserCircle } from 'lucide-react';
 
-const Header = ({ title }) => {
+const Header = ({ title, userName = 'Admin User', userEmail = 'admin@library.com' }) => {
     return (
         <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-gray-200 px-6 py-4 flex items-center justify-between">
             <h1 className="text-2xl font-bold text-text">{title || 'Admin Dashboard'}</h1>
@@ -31,8 +31,8 @@ const Header = ({ title }) => {
                 <div className="flex items-center gap-2">
                     <UserCircle className="w-8 h-8 text-gray-400" />
                     <div className="hidden md:block">
-                        <p className="text-sm font-medium text-text leading-tight">Admin User</p>
-                        <p className="text-xs text-gray-400">admin@library.com</p>
+                        <p className="text-sm font-medium text-text leading-tight">{userName}</p>
+                        <p className="text-xs text-gray-400">{userEmail}</p>
                     </div>
                 </div>
             </div>

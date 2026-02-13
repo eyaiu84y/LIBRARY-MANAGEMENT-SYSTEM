@@ -19,6 +19,13 @@ import IssueBook from './pages/librarian/IssueBook';
 import ReturnBook from './pages/librarian/ReturnBook';
 import LibrarianTransactions from './pages/librarian/Transactions';
 
+// Student
+import StudentLayout from './layouts/StudentLayout';
+import StudentDashboard from './pages/student/Dashboard';
+import StudentViewBooks from './pages/student/ViewBooks';
+import StudentIssuedBooks from './pages/student/MyIssuedBooks';
+import StudentSearchBooks from './pages/student/SearchBooks';
+
 function App() {
   return (
     <Router>
@@ -48,6 +55,15 @@ function App() {
             <Route path="transactions" element={<LibrarianTransactions />} />
           </Route>
 
+          {/* Student Routes */}
+          <Route path="/student" element={<StudentLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<StudentDashboard />} />
+            <Route path="books" element={<StudentViewBooks />} />
+            <Route path="issued" element={<StudentIssuedBooks />} />
+            <Route path="search" element={<StudentSearchBooks />} />
+          </Route>
+
           {/* Default Redirect */}
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
@@ -57,3 +73,4 @@ function App() {
 }
 
 export default App;
+
