@@ -1,28 +1,59 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, BookMarked, AlertTriangle } from 'lucide-react';
 import StatsCard from '../../components/dashboard/StatsCard';
-
-const mockStats = [
-    { id: 1, label: 'Total Books', value: 1248, icon: BookOpen, color: 'primary' },
-    { id: 2, label: 'Total Issued', value: 87, icon: BookMarked, color: 'secondary' },
-    { id: 3, label: 'Overdue Books', value: 12, icon: AlertTriangle, color: 'rose' },
-];
+import { fetchLibrarianStats } from '../../lib/librarian';
+import { supabase } from '../../supabase';
 
 const LibrarianDashboard = () => {
-    const [stats, setStats] = useState([]);
+    const [stats, setStats] = useState({ totalBooks: 0, totalIssued: 0, overdueBooks: 0 });
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    const loadStats = async () => {
+        const result = await fetchLibrarianStats();
+        if (result.error) {
+            setError('Failed to load stats.');
+        } else {
+            setStats(result);
+        }
+        setIsLoading(false);
+    };
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setStats(mockStats);
-            setIsLoading(false);
-        }, 2000);
-        return () => clearTimeout(timer);
+        loadStats();
+
+        // Realtime: refresh stats whenever books or transactions change
+        const booksSub = supabase
+            .channel('librarian-dashboard-books')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'books' }, loadStats)
+            .subscribe();
+
+        const txnSub = supabase
+            .channel('librarian-dashboard-txns')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, loadStats)
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(booksSub);
+            supabase.removeChannel(txnSub);
+        };
     }, []);
+
+    const statCards = [
+        { id: 1, label: 'Total Books',   value: stats.totalBooks,   icon: BookOpen,      color: 'primary' },
+        { id: 2, label: 'Total Issued',  value: stats.totalIssued,  icon: BookMarked,    color: 'secondary' },
+        { id: 3, label: 'Overdue Books', value: stats.overdueBooks, icon: AlertTriangle, color: 'rose' },
+    ];
 
     return (
         <div className="animate-fade-in">
             <h2 className="text-xl font-semibold text-text dark:text-slate-100 mb-6">Overview</h2>
+
+            {error && (
+                <div className="mb-4 p-3 rounded-lg bg-error/10 border border-error/20 text-error text-sm">
+                    {error}
+                </div>
+            )}
 
             {isLoading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -40,7 +71,7 @@ const LibrarianDashboard = () => {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {stats.map((s) => (
+                    {statCards.map((s) => (
                         <StatsCard key={s.id} icon={s.icon} label={s.label} value={s.value} color={s.color} />
                     ))}
                 </div>

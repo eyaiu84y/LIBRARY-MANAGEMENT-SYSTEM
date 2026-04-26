@@ -1,21 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 import TogglePassword from '../ui/TogglePassword';
 import useFormValidation from '../../hooks/useFormValidation';
 import { signIn } from '../../auth';
+import { useAuth } from '../../context/AuthContext';
 
 const roleRoutes = {
-    admin: '/admin/dashboard',
+    admin:     '/admin/dashboard',
     librarian: '/librarian/dashboard',
-    student: '/student/dashboard',
+    student:   '/student/dashboard',
 };
 
 const LoginForm = () => {
     const navigate = useNavigate();
+    const { profile } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
-    const [submitError, setSubmitError] = useState('');
+    const [submitError, setSubmitError]   = useState('');
+    const [loggingIn, setLoggingIn]       = useState(false);
+
+    // Once the profile loads in context after sign-in, navigate to the right dashboard
+    useEffect(() => {
+        if (loggingIn && profile?.role) {
+            setLoggingIn(false);
+            navigate(roleRoutes[profile.role] || '/login');
+        }
+    }, [profile, loggingIn, navigate]);
 
     const { values, errors, isSubmitting, handleChange, handleSubmit } = useFormValidation(
         { email: '', password: '' },
@@ -36,8 +47,8 @@ const LoginForm = () => {
     const onSubmit = async (formData) => {
         setSubmitError('');
 
-        const { data, error } = await signIn({
-            email: formData.email,
+        const { error } = await signIn({
+            email:    formData.email,
             password: formData.password,
         });
 
@@ -46,9 +57,12 @@ const LoginForm = () => {
             return;
         }
 
-        const role = data.user?.user_metadata?.role || 'student';
-        navigate(roleRoutes[role] || '/login');
+        // Signal that we're waiting for the profile to load in AuthContext,
+        // then the useEffect above will navigate once profile.role is available.
+        setLoggingIn(true);
     };
+
+    const busy = isSubmitting || loggingIn;
 
     return (
         <form
@@ -91,8 +105,8 @@ const LoginForm = () => {
                 }
             />
 
-            <Button type="submit" isLoading={isSubmitting}>
-                Sign In
+            <Button type="submit" isLoading={busy}>
+                {loggingIn ? 'Loading your dashboard...' : 'Sign In'}
             </Button>
 
             <div className="text-center text-sm text-gray-500 dark:text-gray-400">

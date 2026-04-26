@@ -5,43 +5,36 @@ import { getProfile } from '../auth';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-    const [session, setSession] = useState(null);
-    const [profile, setProfile] = useState(null); // { id, full_name, email, role }
-    const [loading, setLoading] = useState(true);
-
-    // Load profile helper
-    const loadProfile = async (userId) => {
-        const { data, error } = await getProfile(userId);
-        if (!error) setProfile(data);
-    };
+    const [session, setSession]   = useState(null);
+    const [profile, setProfile]   = useState(null);
+    const [loading, setLoading]   = useState(true);
 
     useEffect(() => {
-        // Get initial session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-            if (session?.user) loadProfile(session.user.id);
-            setLoading(false);
-        });
-
-        // Listen for auth state changes (login, logout, token refresh)
+        // onAuthStateChange fires for the initial session too (INITIAL_SESSION event),
+        // so we don't need a separate getSession() call — that was causing the double fetch.
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (_event, session) => {
                 setSession(session);
+
                 if (session?.user) {
-                    await loadProfile(session.user.id);
+                    // Fetch profile and wait for it before clearing the loading state.
+                    // This prevents ProtectedRoute from seeing profile=null and bouncing to /login.
+                    const { data } = await getProfile(session.user.id);
+                    setProfile(data ?? null);
                 } else {
                     setProfile(null);
                 }
+
+                // Only mark loading done after we have everything we need.
+                setLoading(false);
             }
         );
 
         return () => subscription.unsubscribe();
     }, []);
 
-    const value = { session, profile, loading };
-
     return (
-        <AuthContext.Provider value={value}>
+        <AuthContext.Provider value={{ session, profile, loading }}>
             {children}
         </AuthContext.Provider>
     );

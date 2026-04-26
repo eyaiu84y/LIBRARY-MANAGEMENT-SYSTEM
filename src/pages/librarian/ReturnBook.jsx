@@ -1,82 +1,84 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import Table from '../../components/ui/Table';
-
-const mockIssuedBooks = [
-    { id: 1, student: 'John Carter', book: 'Clean Code', issueDate: '2026-01-15', dueDate: '2026-01-29', status: 'Issued' },
-    { id: 2, student: 'Sarah Kim', book: 'Design Patterns', issueDate: '2026-01-20', dueDate: '2026-02-03', status: 'Overdue' },
-    { id: 3, student: 'Mike Brown', book: 'The Pragmatic Programmer', issueDate: '2026-02-01', dueDate: '2026-02-15', status: 'Issued' },
-    { id: 4, student: 'Emily Chen', book: 'Artificial Intelligence', issueDate: '2026-01-05', dueDate: '2026-01-19', status: 'Overdue' },
-    { id: 5, student: 'James Wilson', book: 'Intro to Algorithms', issueDate: '2026-02-05', dueDate: '2026-02-19', status: 'Issued' },
-];
+import { fetchTransactions, returnBook } from '../../lib/librarian';
+import { supabase } from '../../supabase';
 
 const statusStyles = {
-    Issued:   'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400',
-    Returned: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
-    Overdue:  'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400',
+    issued:   'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400',
+    returned: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
+    overdue:  'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400',
 };
 
+const fmt = (iso) => iso ? new Date(iso).toLocaleDateString() : '—';
+
 const ReturnBook = () => {
-    const [data, setData] = useState([]);
+    const [data, setData]           = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [returningId, setReturningId] = useState(null);
+    const [error, setError]         = useState('');
+
+    const load = async () => {
+        const { data: txns, error } = await fetchTransactions();
+        if (error) { setError(error.message); setIsLoading(false); return; }
+        // Only show non-returned transactions on this page
+        setData((txns || []).filter((t) => t.status !== 'returned'));
+        setIsLoading(false);
+    };
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setData(mockIssuedBooks);
-            setIsLoading(false);
-        }, 2000);
-        return () => clearTimeout(timer);
+        load();
+
+        const channel = supabase
+            .channel('return-book-txns')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, load)
+            .subscribe();
+
+        return () => supabase.removeChannel(channel);
     }, []);
 
-    const handleMarkReturned = (row) => {
+    const handleMarkReturned = async (row) => {
         setReturningId(row.id);
-        setTimeout(() => {
-            setData((prev) =>
-                prev.map((item) => item.id === row.id ? { ...item, status: 'Returned' } : item)
-            );
-            setReturningId(null);
-        }, 2000);
+        setError('');
+        const { error } = await returnBook(row.id, row.books.id);
+        if (error) setError(error.message);
+        // Realtime will update the list automatically
+        setReturningId(null);
     };
 
     const columns = [
-        { key: 'student', label: 'Student' },
-        { key: 'book', label: 'Book' },
-        { key: 'issueDate', label: 'Issue Date' },
-        { key: 'dueDate', label: 'Due Date' },
+        { key: 'student',   label: 'Student',    render: (row) => row.student?.full_name || '—' },
+        { key: 'book',      label: 'Book',        render: (row) => row.books?.title || '—' },
+        { key: 'issued_at', label: 'Issue Date',  render: (row) => fmt(row.issued_at) },
+        { key: 'due_date',  label: 'Due Date',    render: (row) => fmt(row.due_date) },
         {
-            key: 'status',
-            label: 'Status',
+            key: 'status', label: 'Status',
             render: (row) => (
-                <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusStyles[row.status] || ''}`}>
+                <span className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${statusStyles[row.status] || ''}`}>
                     {row.status}
                 </span>
             ),
         },
         {
-            key: 'actions',
-            label: 'Actions',
-            render: (row) => {
-                if (row.status === 'Returned') return <span className="text-xs text-gray-400 dark:text-gray-600">—</span>;
-                return (
-                    <button
-                        onClick={() => handleMarkReturned(row)}
-                        disabled={returningId === row.id}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 disabled:opacity-50 ${
-                            row.status === 'Overdue'
-                                ? 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/60'
-                                : 'bg-secondary/10 dark:bg-secondary/20 text-secondary hover:bg-secondary/20 dark:hover:bg-secondary/30'
-                        }`}
-                        aria-label={`Mark ${row.book} as returned`}
-                    >
-                        {returningId === row.id
-                            ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            : <CheckCircle className="w-3.5 h-3.5" />
-                        }
-                        Mark Returned
-                    </button>
-                );
-            },
+            key: 'actions', label: 'Actions',
+            render: (row) => (
+                <button
+                    onClick={() => handleMarkReturned(row)}
+                    disabled={returningId === row.id}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 disabled:opacity-50 ${
+                        row.status === 'overdue'
+                            ? 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/60'
+                            : 'bg-secondary/10 dark:bg-secondary/20 text-secondary hover:bg-secondary/20 dark:hover:bg-secondary/30'
+                    }`}
+                    aria-label={`Mark ${row.books?.title} as returned`}
+                >
+                    {returningId === row.id
+                        ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        : <CheckCircle className="w-3.5 h-3.5" />
+                    }
+                    Mark Returned
+                </button>
+            ),
         },
     ];
 
@@ -84,11 +86,21 @@ const ReturnBook = () => {
         <div className="animate-fade-in">
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-text dark:text-slate-100">Return Book</h2>
-                <span className="text-sm text-gray-400 dark:text-gray-500">
-                    {data.filter((d) => d.status !== 'Returned').length} pending
-                </span>
+                <span className="text-sm text-gray-400 dark:text-gray-500">{data.length} pending</span>
             </div>
-            <Table columns={columns} data={data} isLoading={isLoading} />
+
+            {error && (
+                <div className="mb-4 p-3 rounded-lg bg-error/10 border border-error/20 text-error text-sm">
+                    {error}
+                </div>
+            )}
+
+            <Table
+                columns={columns}
+                data={data}
+                isLoading={isLoading}
+                emptyMessage="No pending returns."
+            />
         </div>
     );
 };
