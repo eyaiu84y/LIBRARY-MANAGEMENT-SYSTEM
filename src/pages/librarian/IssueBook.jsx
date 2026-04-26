@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Button from '../../components/ui/Button';
 import { fetchStudents, fetchBooks, issueBook } from '../../lib/librarian';
-import useAuth from '../../../hooks/useAuth';
+import useAuth from '../../hooks/useAuth';
 
 const getToday = () => new Date().toISOString().split('T')[0];
 const getDefaultDue = () => {

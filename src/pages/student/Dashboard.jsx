@@ -13,11 +13,8 @@ const StudentDashboard = () => {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setStats(mockStats);
-            setIsLoading(false);
-        }, 2000);
-        return () => clearTimeout(timer);
+        setStats(mockStats);
+        setIsLoading(false);
     }, []);
 
     return (
