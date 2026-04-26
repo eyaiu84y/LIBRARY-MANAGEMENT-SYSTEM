@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { twMerge } from 'tailwind-merge';
 
 const Input = React.forwardRef(({
@@ -16,7 +15,7 @@ const Input = React.forwardRef(({
             {label && (
                 <label
                     htmlFor={id}
-                    className="block text-sm font-medium text-text/80"
+                    className="block text-sm font-medium text-text/80 dark:text-slate-300"
                 >
                     {label}
                 </label>
@@ -27,7 +26,7 @@ const Input = React.forwardRef(({
                     id={id}
                     type={type}
                     className={twMerge(
-                        "w-full px-4 py-3 rounded-lg border border-gray-200 bg-white text-text placeholder:text-gray-400 focus-glow transition-all duration-200",
+                        "w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-text dark:text-slate-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus-glow transition-all duration-200",
                         error && "border-error focus:ring-error/20 focus:border-error",
                         rightElement && "pr-12",
                         className
@@ -35,7 +34,7 @@ const Input = React.forwardRef(({
                     {...props}
                 />
                 {rightElement && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
                         {rightElement}
                     </div>
                 )}

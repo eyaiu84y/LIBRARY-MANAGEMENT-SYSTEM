@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 
@@ -29,7 +30,7 @@ import StudentSearchBooks from './pages/student/SearchBooks';
 function App() {
   return (
     <Router>
-      <div className="antialiased text-text bg-background min-h-screen font-sans">
+      <div className="antialiased text-text dark:text-slate-100 bg-background dark:bg-gray-950 min-h-screen font-sans transition-colors duration-300">
         <Routes>
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />
@@ -64,8 +65,8 @@ function App() {
             <Route path="search" element={<StudentSearchBooks />} />
           </Route>
 
-          {/* Default Redirect */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          {/* Landing & Default */}
+          <Route path="/" element={<LandingPage />} />
         </Routes>
       </div>
     </Router>

@@ -1,6 +1,5 @@
 import React from 'react';
 import { Loader2 } from 'lucide-react';
-
 import { twMerge } from 'tailwind-merge';
 
 const Button = ({
@@ -15,7 +14,7 @@ const Button = ({
 
     const variants = {
         primary: "bg-primary text-white hover:bg-primary/90 focus:ring-primary",
-        secondary: "bg-white text-text border border-gray-200 hover:bg-gray-50 focus:ring-gray-200",
+        secondary: "bg-white dark:bg-gray-800 text-text dark:text-slate-200 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-gray-200",
         danger: "bg-error text-white hover:bg-error/90 focus:ring-error",
     };
 

@@ -12,19 +12,19 @@ const Table = ({ columns, data, isLoading, onAction, emptyMessage = 'No data fou
 
     if (!data || data.length === 0) {
         return (
-            <div className="text-center py-16 text-gray-400 text-sm">{emptyMessage}</div>
+            <div className="text-center py-16 text-gray-400 dark:text-gray-500 text-sm">{emptyMessage}</div>
         );
     }
 
     return (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-soft">
+        <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-soft">
             <table className="w-full text-sm text-left" role="table">
                 <thead>
-                    <tr className="bg-gray-50 border-b border-gray-200">
+                    <tr className="bg-gray-50 dark:bg-gray-700/60 border-b border-gray-200 dark:border-gray-700">
                         {columns.map((col) => (
                             <th
                                 key={col.key}
-                                className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                                className="px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                                 scope="col"
                             >
                                 {col.label}
@@ -36,10 +36,10 @@ const Table = ({ columns, data, isLoading, onAction, emptyMessage = 'No data fou
                     {data.map((row, idx) => (
                         <tr
                             key={row.id || idx}
-                            className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors duration-150"
+                            className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50/50 dark:hover:bg-gray-700/40 transition-colors duration-150"
                         >
                             {columns.map((col) => (
-                                <td key={col.key} className="px-5 py-3.5 text-text whitespace-nowrap">
+                                <td key={col.key} className="px-5 py-3.5 text-text dark:text-slate-200 whitespace-nowrap">
                                     {col.render ? col.render(row, onAction) : row[col.key]}
                                 </td>
                             ))}

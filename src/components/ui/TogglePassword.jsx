@@ -6,7 +6,7 @@ const TogglePassword = ({ show, onToggle, className }) => {
         <button
             type="button"
             onClick={onToggle}
-            className={`p-1 rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 ${className}`}
+            className={`p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 text-gray-400 dark:text-gray-500 ${className}`}
             aria-label={show ? "Hide password" : "Show password"}
         >
             {show ? (

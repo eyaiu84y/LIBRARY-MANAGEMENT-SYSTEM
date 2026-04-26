@@ -5,7 +5,7 @@ import Header from '../components/ui/Header';
 
 const StudentLayout = () => {
     return (
-        <div className="flex min-h-screen bg-background">
+        <div className="flex min-h-screen bg-background dark:bg-gray-950 transition-colors duration-300">
             <StudentSidebar />
             <div className="flex-1 ml-64 transition-all duration-300 flex flex-col">
                 <Header

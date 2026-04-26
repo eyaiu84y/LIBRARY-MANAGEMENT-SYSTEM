@@ -31,14 +31,13 @@ const LibrarianSidebar = () => {
 
     return (
         <aside
-            className={`fixed top-0 left-0 h-screen bg-white border-r border-gray-200 shadow-sm flex flex-col transition-all duration-300 z-30 ${collapsed ? 'w-20' : 'w-64'
-                }`}
+            className={`fixed top-0 left-0 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 shadow-sm flex flex-col transition-all duration-300 z-30 ${collapsed ? 'w-20' : 'w-64'}`}
         >
             {/* Brand */}
-            <div className="flex items-center gap-3 px-5 py-5 border-b border-gray-100">
+            <div className="flex items-center gap-3 px-5 py-5 border-b border-gray-100 dark:border-gray-700">
                 <Library className="w-8 h-8 text-secondary flex-shrink-0" />
                 {!collapsed && (
-                    <span className="text-lg font-bold text-text whitespace-nowrap">
+                    <span className="text-lg font-bold text-text dark:text-slate-100 whitespace-nowrap">
                         Librarian Panel
                     </span>
                 )}
@@ -53,8 +52,8 @@ const LibrarianSidebar = () => {
                                 to={item.path}
                                 className={({ isActive }) =>
                                     `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${isActive
-                                        ? 'bg-secondary/10 text-secondary'
-                                        : 'text-gray-600 hover:bg-gray-50 hover:text-text'
+                                        ? 'bg-secondary/10 text-secondary dark:bg-secondary/20'
+                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-text dark:hover:text-slate-100'
                                     }`
                                 }
                                 aria-label={item.label}
@@ -68,10 +67,10 @@ const LibrarianSidebar = () => {
             </nav>
 
             {/* Footer */}
-            <div className="border-t border-gray-100 p-3 space-y-1">
+            <div className="border-t border-gray-100 dark:border-gray-700 p-3 space-y-1">
                 <button
                     onClick={handleLogout}
-                    className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-all duration-200 group"
+                    className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-all duration-200 group"
                     aria-label="Logout"
                 >
                     <LogOut className="w-5 h-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
@@ -80,7 +79,7 @@ const LibrarianSidebar = () => {
 
                 <button
                     onClick={() => setCollapsed(!collapsed)}
-                    className="flex items-center justify-center w-full py-2 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-text transition-all duration-200"
+                    className="flex items-center justify-center w-full py-2 rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-text dark:hover:text-slate-100 transition-all duration-200"
                     aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                 >
                     {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
