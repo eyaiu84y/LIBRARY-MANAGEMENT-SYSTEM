@@ -10,6 +10,12 @@ const mockTransactions = [
     { id: 6, student: 'Nadia Patel', book: 'Database Systems', issueDate: '2026-02-08', returnDate: '—', status: 'Issued' },
 ];
 
+const statusStyles = {
+    Issued:   'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400',
+    Returned: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
+    Overdue:  'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400',
+};
+
 const columns = [
     { key: 'student', label: 'Student' },
     { key: 'book', label: 'Book' },
@@ -18,18 +24,11 @@ const columns = [
     {
         key: 'status',
         label: 'Status',
-        render: (row) => {
-            const styles = {
-                Issued: 'bg-blue-100 text-blue-700',
-                Returned: 'bg-emerald-100 text-emerald-700',
-                Overdue: 'bg-red-100 text-red-600',
-            };
-            return (
-                <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${styles[row.status] || ''}`}>
-                    {row.status}
-                </span>
-            );
-        },
+        render: (row) => (
+            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusStyles[row.status] || ''}`}>
+                {row.status}
+            </span>
+        ),
     },
 ];
 
@@ -48,8 +47,8 @@ const LibrarianTransactions = () => {
     return (
         <div className="animate-fade-in">
             <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-text">Transactions</h2>
-                <span className="text-sm text-gray-400">{data.length} total</span>
+                <h2 className="text-xl font-semibold text-text dark:text-slate-100">Transactions</h2>
+                <span className="text-sm text-gray-400 dark:text-gray-500">{data.length} total</span>
             </div>
             <Table columns={columns} data={data} isLoading={isLoading} />
         </div>

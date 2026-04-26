@@ -24,6 +24,10 @@ const getDefaultDue = () => {
     return d.toISOString().split('T')[0];
 };
 
+const selectCls = 'w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-text dark:text-slate-200 text-sm focus-glow';
+const inputCls  = 'w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-text dark:text-slate-200 text-sm focus-glow';
+const labelCls  = 'block text-sm font-medium text-text/80 dark:text-slate-300';
+
 const IssueBook = () => {
     const [formData, setFormData] = useState({
         studentId: '',
@@ -43,9 +47,6 @@ const IssueBook = () => {
         e.preventDefault();
         setIsSubmitting(true);
         setTimeout(() => {
-            const student = mockStudents.find((s) => s.id === parseInt(formData.studentId));
-            const book = mockBooks.find((b) => b.id === parseInt(formData.bookId));
-            console.log('Book Issued:', { student: student?.name, book: book?.title, issueDate: formData.issueDate, dueDate: formData.dueDate });
             setSuccess(true);
             setIsSubmitting(false);
             setFormData({ studentId: '', bookId: '', issueDate: getToday(), dueDate: getDefaultDue() });
@@ -54,80 +55,40 @@ const IssueBook = () => {
 
     return (
         <div className="animate-fade-in">
-            <h2 className="text-xl font-semibold text-text mb-6">Issue a Book</h2>
+            <h2 className="text-xl font-semibold text-text dark:text-slate-100 mb-6">Issue a Book</h2>
 
-            <div className="bg-white rounded-xl p-6 shadow-soft max-w-lg">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-soft border border-transparent dark:border-gray-700 max-w-lg">
                 {success && (
-                    <div className="p-3 mb-5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm animate-fade-in">
+                    <div className="p-3 mb-5 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400 text-sm animate-fade-in">
                         Book issued successfully!
                     </div>
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
-                    {/* Select Student */}
                     <div className="space-y-1.5">
-                        <label htmlFor="studentId" className="block text-sm font-medium text-text/80">Select Student</label>
-                        <select
-                            id="studentId"
-                            name="studentId"
-                            required
-                            value={formData.studentId}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-text text-sm focus-glow"
-                            aria-label="Select student"
-                        >
+                        <label htmlFor="studentId" className={labelCls}>Select Student</label>
+                        <select id="studentId" name="studentId" required value={formData.studentId} onChange={handleChange} className={selectCls} aria-label="Select student">
                             <option value="">— Choose a student —</option>
-                            {mockStudents.map((s) => (
-                                <option key={s.id} value={s.id}>{s.name}</option>
-                            ))}
+                            {mockStudents.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                         </select>
                     </div>
 
-                    {/* Select Book */}
                     <div className="space-y-1.5">
-                        <label htmlFor="bookId" className="block text-sm font-medium text-text/80">Select Book</label>
-                        <select
-                            id="bookId"
-                            name="bookId"
-                            required
-                            value={formData.bookId}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-text text-sm focus-glow"
-                            aria-label="Select book"
-                        >
+                        <label htmlFor="bookId" className={labelCls}>Select Book</label>
+                        <select id="bookId" name="bookId" required value={formData.bookId} onChange={handleChange} className={selectCls} aria-label="Select book">
                             <option value="">— Choose a book —</option>
-                            {mockBooks.map((b) => (
-                                <option key={b.id} value={b.id}>{b.title}</option>
-                            ))}
+                            {mockBooks.map((b) => <option key={b.id} value={b.id}>{b.title}</option>)}
                         </select>
                     </div>
 
-                    {/* Issue Date */}
                     <div className="space-y-1.5">
-                        <label htmlFor="issueDate" className="block text-sm font-medium text-text/80">Issue Date</label>
-                        <input
-                            id="issueDate"
-                            name="issueDate"
-                            type="date"
-                            required
-                            value={formData.issueDate}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-text text-sm focus-glow"
-                        />
+                        <label htmlFor="issueDate" className={labelCls}>Issue Date</label>
+                        <input id="issueDate" name="issueDate" type="date" required value={formData.issueDate} onChange={handleChange} className={inputCls} />
                     </div>
 
-                    {/* Due Date */}
                     <div className="space-y-1.5">
-                        <label htmlFor="dueDate" className="block text-sm font-medium text-text/80">Due Date</label>
-                        <input
-                            id="dueDate"
-                            name="dueDate"
-                            type="date"
-                            required
-                            value={formData.dueDate}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-text text-sm focus-glow"
-                        />
+                        <label htmlFor="dueDate" className={labelCls}>Due Date</label>
+                        <input id="dueDate" name="dueDate" type="date" required value={formData.dueDate} onChange={handleChange} className={inputCls} />
                     </div>
 
                     <Button type="submit" isLoading={isSubmitting}>Issue Book</Button>

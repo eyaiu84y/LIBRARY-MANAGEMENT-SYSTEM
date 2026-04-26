@@ -6,6 +6,7 @@ export const signUp = async ({ email, password, fullName, role = 'student' }) =>
     password,
     options: {
       data: { full_name: fullName, role },
+      emailRedirectTo: `${window.location.origin}/login`,
     },
   });
   return { data, error };
