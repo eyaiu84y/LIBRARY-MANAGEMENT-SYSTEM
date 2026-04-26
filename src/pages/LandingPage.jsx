@@ -16,7 +16,7 @@ import {
     Sun,
     Moon,
 } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+import useTheme from '../hooks/useTheme';
 
 /* ─── Animated counter ─────────────────────────────────────────── */
 const Counter = ({ target, duration = 1800 }) => {
@@ -41,7 +41,8 @@ const Counter = ({ target, duration = 1800 }) => {
 };
 
 /* ─── Role card ─────────────────────────────────────────────────── */
-const RoleCard = ({ icon: Icon, title, description, color, features, path, navigate }) => {
+const RoleCard = ({ icon, title, description, color, features, path, navigate }) => {
+    const RoleIcon = icon;
     const colorMap = {
         primary: {
             bg: 'bg-primary/10 dark:bg-primary/20',
@@ -70,7 +71,7 @@ const RoleCard = ({ icon: Icon, title, description, color, features, path, navig
     return (
         <div className={`bg-white dark:bg-gray-800 rounded-2xl p-7 shadow-soft border ${c.border} flex flex-col gap-5 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group`}>
             <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${c.bg} transition-transform duration-300 group-hover:scale-110`}>
-                <Icon className={`w-7 h-7 ${c.text}`} />
+                <RoleIcon className={`w-7 h-7 ${c.text}`} />
             </div>
             <div>
                 <h3 className="text-lg font-bold text-text dark:text-slate-100 mb-1">{title}</h3>
@@ -95,17 +96,20 @@ const RoleCard = ({ icon: Icon, title, description, color, features, path, navig
 };
 
 /* ─── Feature item ──────────────────────────────────────────────── */
-const FeatureItem = ({ icon: Icon, title, description }) => (
+const FeatureItem = ({ icon, title, description }) => {
+    const FeatureIcon = icon;
+    return (
     <div className="flex gap-4 items-start group">
         <div className="w-10 h-10 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-110">
-            <Icon className="w-5 h-5 text-primary" />
+            <FeatureIcon className="w-5 h-5 text-primary" />
         </div>
         <div>
             <h4 className="text-sm font-semibold text-text dark:text-slate-100 mb-0.5">{title}</h4>
             <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{description}</p>
         </div>
     </div>
-);
+    );
+};
 
 /* ─── Stat item ─────────────────────────────────────────────────── */
 const StatItem = ({ value, label }) => (

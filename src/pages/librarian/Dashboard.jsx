@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { BookOpen, BookMarked, AlertTriangle } from 'lucide-react';
 import StatsCard from '../../components/dashboard/StatsCard';
 import { fetchLibrarianStats } from '../../lib/librarian';
@@ -9,20 +9,16 @@ const LibrarianDashboard = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
 
-    const loadStats = async () => {
+    const loadStats = useCallback(async () => {
         const result = await fetchLibrarianStats();
-        if (result.error) {
-            setError('Failed to load stats.');
-        } else {
-            setStats(result);
-        }
+        if (result.error) setError('Failed to load stats.');
+        else setStats(result);
         setIsLoading(false);
-    };
+    }, []);
 
     useEffect(() => {
-        loadStats();
+        (async () => { await loadStats(); })();
 
-        // Realtime: refresh stats whenever books or transactions change
         const booksSub = supabase
             .channel('librarian-dashboard-books')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'books' }, loadStats)
@@ -37,7 +33,7 @@ const LibrarianDashboard = () => {
             supabase.removeChannel(booksSub);
             supabase.removeChannel(txnSub);
         };
-    }, []);
+    }, [loadStats]);
 
     const statCards = [
         { id: 1, label: 'Total Books',   value: stats.totalBooks,   icon: BookOpen,      color: 'primary' },

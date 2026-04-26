@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Table from '../../components/ui/Table';
 import { fetchTransactions } from '../../lib/librarian';
 import { supabase } from '../../supabase';
@@ -28,20 +28,20 @@ const columns = [
 ];
 
 const LibrarianTransactions = () => {
-    const [data, setData]           = useState([]);
+    const [data, setData]       = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError]         = useState('');
-    const [filter, setFilter]       = useState('all');
+    const [error, setError]     = useState('');
+    const [filter, setFilter]   = useState('all');
 
-    const load = async () => {
-        const { data: txns, error } = await fetchTransactions();
-        if (error) setError(error.message);
+    const load = useCallback(async () => {
+        const { data: txns, error: err } = await fetchTransactions();
+        if (err) setError(err.message);
         else setData(txns || []);
         setIsLoading(false);
-    };
+    }, []);
 
     useEffect(() => {
-        load();
+        (async () => { await load(); })();
 
         const channel = supabase
             .channel('librarian-transactions')
@@ -49,7 +49,7 @@ const LibrarianTransactions = () => {
             .subscribe();
 
         return () => supabase.removeChannel(channel);
-    }, []);
+    }, [load]);
 
     const filtered = filter === 'all' ? data : data.filter((t) => t.status === filter);
 
@@ -61,7 +61,6 @@ const LibrarianTransactions = () => {
                     <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">{filtered.length} records</p>
                 </div>
 
-                {/* Filter tabs */}
                 <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 text-sm">
                     {['all', 'issued', 'returned', 'overdue'].map((f) => (
                         <button
@@ -85,12 +84,7 @@ const LibrarianTransactions = () => {
                 </div>
             )}
 
-            <Table
-                columns={columns}
-                data={filtered}
-                isLoading={isLoading}
-                emptyMessage="No transactions found."
-            />
+            <Table columns={columns} data={filtered} isLoading={isLoading} emptyMessage="No transactions found." />
         </div>
     );
 };

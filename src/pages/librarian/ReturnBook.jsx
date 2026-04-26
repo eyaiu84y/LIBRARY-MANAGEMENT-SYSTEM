@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import Table from '../../components/ui/Table';
 import { fetchTransactions, returnBook } from '../../lib/librarian';
@@ -13,21 +13,20 @@ const statusStyles = {
 const fmt = (iso) => iso ? new Date(iso).toLocaleDateString() : '—';
 
 const ReturnBook = () => {
-    const [data, setData]           = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [data, setData]               = useState([]);
+    const [isLoading, setIsLoading]     = useState(true);
     const [returningId, setReturningId] = useState(null);
-    const [error, setError]         = useState('');
+    const [error, setError]             = useState('');
 
-    const load = async () => {
-        const { data: txns, error } = await fetchTransactions();
-        if (error) { setError(error.message); setIsLoading(false); return; }
-        // Only show non-returned transactions on this page
+    const load = useCallback(async () => {
+        const { data: txns, error: err } = await fetchTransactions();
+        if (err) { setError(err.message); setIsLoading(false); return; }
         setData((txns || []).filter((t) => t.status !== 'returned'));
         setIsLoading(false);
-    };
+    }, []);
 
     useEffect(() => {
-        load();
+        (async () => { await load(); })();
 
         const channel = supabase
             .channel('return-book-txns')
@@ -35,22 +34,21 @@ const ReturnBook = () => {
             .subscribe();
 
         return () => supabase.removeChannel(channel);
-    }, []);
+    }, [load]);
 
     const handleMarkReturned = async (row) => {
         setReturningId(row.id);
         setError('');
-        const { error } = await returnBook(row.id, row.books.id);
-        if (error) setError(error.message);
-        // Realtime will update the list automatically
+        const { error: err } = await returnBook(row.id, row.books.id);
+        if (err) setError(err.message);
         setReturningId(null);
     };
 
     const columns = [
-        { key: 'student',   label: 'Student',    render: (row) => row.student?.full_name || '—' },
-        { key: 'book',      label: 'Book',        render: (row) => row.books?.title || '—' },
-        { key: 'issued_at', label: 'Issue Date',  render: (row) => fmt(row.issued_at) },
-        { key: 'due_date',  label: 'Due Date',    render: (row) => fmt(row.due_date) },
+        { key: 'student',   label: 'Student',   render: (row) => row.student?.full_name || '—' },
+        { key: 'book',      label: 'Book',       render: (row) => row.books?.title || '—' },
+        { key: 'issued_at', label: 'Issue Date', render: (row) => fmt(row.issued_at) },
+        { key: 'due_date',  label: 'Due Date',   render: (row) => fmt(row.due_date) },
         {
             key: 'status', label: 'Status',
             render: (row) => (
@@ -95,12 +93,7 @@ const ReturnBook = () => {
                 </div>
             )}
 
-            <Table
-                columns={columns}
-                data={data}
-                isLoading={isLoading}
-                emptyMessage="No pending returns."
-            />
+            <Table columns={columns} data={data} isLoading={isLoading} emptyMessage="No pending returns." />
         </div>
     );
 };

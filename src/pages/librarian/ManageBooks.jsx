@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Pencil, Trash2, Plus, X, Check } from 'lucide-react';
 import Table from '../../components/ui/Table';
 import Button from '../../components/ui/Button';
@@ -6,34 +6,30 @@ import { fetchBooks, addBook, updateBook, deleteBook } from '../../lib/librarian
 import { supabase } from '../../supabase';
 
 const inputCls = 'w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-text dark:text-slate-200 text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus-glow';
-
 const EMPTY_BOOK = { title: '', author: '', category: '', isbn: '', total_copies: '' };
 
 const ManageBooks = () => {
-    const [data, setData]           = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError]         = useState('');
-    const [showForm, setShowForm]   = useState(false);
-    const [isAdding, setIsAdding]   = useState(false);
-    const [newBook, setNewBook]     = useState(EMPTY_BOOK);
-
-    // Edit state
+    const [data, setData]               = useState([]);
+    const [isLoading, setIsLoading]     = useState(true);
+    const [error, setError]             = useState('');
+    const [showForm, setShowForm]       = useState(false);
+    const [isAdding, setIsAdding]       = useState(false);
+    const [newBook, setNewBook]         = useState(EMPTY_BOOK);
     const [editingId, setEditingId]     = useState(null);
     const [editValues, setEditValues]   = useState({});
     const [isSaving, setIsSaving]       = useState(false);
 
-    const load = async () => {
+    const load = useCallback(async () => {
         setIsLoading(true);
-        const { data: books, error } = await fetchBooks();
-        if (error) setError(error.message);
+        const { data: books, error: err } = await fetchBooks();
+        if (err) setError(err.message);
         else setData(books || []);
         setIsLoading(false);
-    };
+    }, []);
 
     useEffect(() => {
-        load();
+        (async () => { await load(); })();
 
-        // Realtime subscription
         const channel = supabase
             .channel('manage-books')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'books' }, (payload) => {
@@ -48,18 +44,15 @@ const ManageBooks = () => {
             .subscribe();
 
         return () => supabase.removeChannel(channel);
-    }, []);
+    }, [load]);
 
     const handleAddBook = async (e) => {
         e.preventDefault();
         setIsAdding(true);
         setError('');
-        const { error } = await addBook(newBook);
-        if (error) setError(error.message);
-        else {
-            setNewBook(EMPTY_BOOK);
-            setShowForm(false);
-        }
+        const { error: err } = await addBook(newBook);
+        if (err) setError(err.message);
+        else { setNewBook(EMPTY_BOOK); setShowForm(false); }
         setIsAdding(false);
     };
 
@@ -72,7 +65,7 @@ const ManageBooks = () => {
         setIsSaving(true);
         const copies = parseInt(editValues.total_copies) || 0;
         const diff   = copies - row.total_copies;
-        const { error } = await updateBook(row.id, {
+        const { error: err } = await updateBook(row.id, {
             title: editValues.title,
             author: editValues.author,
             category: editValues.category,
@@ -80,15 +73,15 @@ const ManageBooks = () => {
             total_copies: copies,
             available_copies: Math.max(0, row.available_copies + diff),
         });
-        if (error) setError(error.message);
+        if (err) setError(err.message);
         else setEditingId(null);
         setIsSaving(false);
     };
 
     const handleDelete = async (row) => {
         if (!window.confirm(`Delete "${row.title}"? This cannot be undone.`)) return;
-        const { error } = await deleteBook(row.id);
-        if (error) setError(error.message);
+        const { error: err } = await deleteBook(row.id);
+        if (err) setError(err.message);
     };
 
     const columns = [

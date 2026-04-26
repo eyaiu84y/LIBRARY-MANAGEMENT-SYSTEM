@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 import TogglePassword from '../ui/TogglePassword';
 import useFormValidation from '../../hooks/useFormValidation';
 import { signIn } from '../../auth';
-import { useAuth } from '../../context/AuthContext';
+import useAuth from '../../hooks/useAuth';
 
 const roleRoutes = {
     admin:     '/admin/dashboard',
@@ -14,19 +14,22 @@ const roleRoutes = {
 };
 
 const LoginForm = () => {
-    const navigate = useNavigate();
-    const { profile } = useAuth();
+    const navigate        = useNavigate();
+    const { profile }     = useAuth();
     const [showPassword, setShowPassword] = useState(false);
     const [submitError, setSubmitError]   = useState('');
     const [loggingIn, setLoggingIn]       = useState(false);
 
-    // Once the profile loads in context after sign-in, navigate to the right dashboard
+    // Use a ref to track whether we're waiting for the profile after sign-in.
+    // This avoids calling setState inside the effect body (lint rule: react-hooks/set-state-in-effect).
+    const waitingForProfile = useRef(false);
+
     useEffect(() => {
-        if (loggingIn && profile?.role) {
-            setLoggingIn(false);
+        if (waitingForProfile.current && profile?.role) {
+            waitingForProfile.current = false;
             navigate(roleRoutes[profile.role] || '/login');
         }
-    }, [profile, loggingIn, navigate]);
+    }, [profile, navigate]);
 
     const { values, errors, isSubmitting, handleChange, handleSubmit } = useFormValidation(
         { email: '', password: '' },
@@ -57,8 +60,9 @@ const LoginForm = () => {
             return;
         }
 
-        // Signal that we're waiting for the profile to load in AuthContext,
-        // then the useEffect above will navigate once profile.role is available.
+        // Mark that we're waiting for AuthContext to load the profile,
+        // then the effect above will navigate once profile.role is available.
+        waitingForProfile.current = true;
         setLoggingIn(true);
     };
 

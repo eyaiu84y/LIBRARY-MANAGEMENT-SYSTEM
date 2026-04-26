@@ -1,7 +1,7 @@
 import React from 'react';
 import { Bell, Search, UserCircle, Sun, Moon } from 'lucide-react';
-import { useTheme } from '../../context/ThemeContext';
-import { useAuth } from '../../context/AuthContext';
+import useTheme from '../../hooks/useTheme';
+import useAuth from '../../hooks/useAuth';
 
 const Header = ({ title }) => {
     const { isDark, toggleTheme } = useTheme();
