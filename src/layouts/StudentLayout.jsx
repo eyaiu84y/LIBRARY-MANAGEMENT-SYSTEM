@@ -10,8 +10,6 @@ const StudentLayout = () => {
             <div className="flex-1 ml-64 transition-all duration-300 flex flex-col">
                 <Header
                     title="Student Dashboard"
-                    userName="Student User"
-                    userEmail="student@library.com"
                 />
                 <main className="flex-1 p-6 max-w-[1200px] w-full mx-auto animate-fade-in">
                     <Outlet />

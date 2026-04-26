@@ -1,9 +1,14 @@
 import React from 'react';
 import { Bell, Search, UserCircle, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 
-const Header = ({ title, userName = 'Admin User', userEmail = 'admin@library.com' }) => {
+const Header = ({ title }) => {
     const { isDark, toggleTheme } = useTheme();
+    const { profile } = useAuth();
+
+    const userName = profile?.full_name || 'User';
+    const userEmail = profile?.email || '';
 
     return (
         <header className="sticky top-0 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between transition-colors duration-300">

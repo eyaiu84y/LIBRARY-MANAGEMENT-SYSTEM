@@ -10,6 +10,7 @@ import {
     ChevronRight,
     GraduationCap,
 } from 'lucide-react';
+import { signOut } from '../../auth';
 
 const navItems = [
     { label: 'Dashboard', icon: LayoutDashboard, path: '/student/dashboard' },
@@ -22,8 +23,8 @@ const StudentSidebar = () => {
     const [collapsed, setCollapsed] = useState(false);
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        console.log('Student logged out');
+    const handleLogout = async () => {
+        await signOut();
         navigate('/login');
     };
 

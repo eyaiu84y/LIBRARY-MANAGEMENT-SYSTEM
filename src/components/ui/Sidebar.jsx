@@ -11,6 +11,7 @@ import {
     ChevronRight,
     Library,
 } from 'lucide-react';
+import { signOut } from '../../auth';
 
 const navItems = [
     { label: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
@@ -24,8 +25,8 @@ const Sidebar = () => {
     const [collapsed, setCollapsed] = useState(false);
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        console.log('Admin logged out');
+    const handleLogout = async () => {
+        await signOut();
         navigate('/login');
     };
 

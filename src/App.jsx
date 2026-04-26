@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ProtectedRoute from './components/ui/ProtectedRoute';
 
 // Admin
 import AdminLayout from './layouts/AdminLayout';
@@ -32,41 +33,45 @@ function App() {
     <Router>
       <div className="antialiased text-text dark:text-slate-100 bg-background dark:bg-gray-950 min-h-screen font-sans transition-colors duration-300">
         <Routes>
-          {/* Auth Routes */}
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="librarians" element={<ManageLibrarians />} />
-            <Route path="students" element={<ManageStudents />} />
-            <Route path="books" element={<ViewBooks />} />
-            <Route path="transactions" element={<AdminTransactions />} />
+          {/* Admin Routes — protected, role: admin */}
+          <Route element={<ProtectedRoute requiredRole="admin" />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="librarians" element={<ManageLibrarians />} />
+              <Route path="students" element={<ManageStudents />} />
+              <Route path="books" element={<ViewBooks />} />
+              <Route path="transactions" element={<AdminTransactions />} />
+            </Route>
           </Route>
 
-          {/* Librarian Routes */}
-          <Route path="/librarian" element={<LibrarianLayout />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<LibrarianDashboard />} />
-            <Route path="books" element={<ManageBooks />} />
-            <Route path="issue" element={<IssueBook />} />
-            <Route path="return" element={<ReturnBook />} />
-            <Route path="transactions" element={<LibrarianTransactions />} />
+          {/* Librarian Routes — protected, role: librarian */}
+          <Route element={<ProtectedRoute requiredRole="librarian" />}>
+            <Route path="/librarian" element={<LibrarianLayout />}>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<LibrarianDashboard />} />
+              <Route path="books" element={<ManageBooks />} />
+              <Route path="issue" element={<IssueBook />} />
+              <Route path="return" element={<ReturnBook />} />
+              <Route path="transactions" element={<LibrarianTransactions />} />
+            </Route>
           </Route>
 
-          {/* Student Routes */}
-          <Route path="/student" element={<StudentLayout />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<StudentDashboard />} />
-            <Route path="books" element={<StudentViewBooks />} />
-            <Route path="issued" element={<StudentIssuedBooks />} />
-            <Route path="search" element={<StudentSearchBooks />} />
+          {/* Student Routes — protected, role: student */}
+          <Route element={<ProtectedRoute requiredRole="student" />}>
+            <Route path="/student" element={<StudentLayout />}>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<StudentDashboard />} />
+              <Route path="books" element={<StudentViewBooks />} />
+              <Route path="issued" element={<StudentIssuedBooks />} />
+              <Route path="search" element={<StudentSearchBooks />} />
+            </Route>
           </Route>
-
-          {/* Landing & Default */}
-          <Route path="/" element={<LandingPage />} />
         </Routes>
       </div>
     </Router>
@@ -74,4 +79,3 @@ function App() {
 }
 
 export default App;
-
